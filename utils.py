@@ -1,17 +1,23 @@
 from sensor_msgs.msg import Image
 
 import rospy
+import random
 
 
-def listener(topic_name, callback):
-    sub = rospy.Subscriber(topic_name, Image, callback)
-    rospy.sleep(0.27)
+def listener(topic_name, image_tools):
+    sub = rospy.Subscriber(topic_name, Image, image_tools.callback)
+    while not image_tools.img_flag:
+        rospy.sleep(0.1)  # 0.27
+    image_tools.img_flag = False
     sub.unregister()
 
 
-def get_center_coordinate_from_kinect():
-    # todo: get center coordinate from saved txt file
-    return 1, 2
+def get_center_coordinate_from_kinect(file_path):
+    size = (1295, 685)
+    with open(file_path, 'r') as f:
+        coors = [int(coor) for coor in f.readline()[:-1].split(' ')]
+        idx = random.randint(0, len(coors) / 2 - 1)
+    return coors[idx * 2 + 1], size[0] - coors[idx * 2]
 
 
 def convert_to_baxter_coordinate(x, y, origin):
