@@ -97,11 +97,14 @@ class BaxterAPI(object):
         self._gripper.close()
         rospy.sleep(0.1)
 
+    def gripper_position(self):
+        return self._gripper.position()
+
     def approach(self, pose):
-        approach = copy.deepcopy(pose)
+        approach_pose = copy.deepcopy(pose)
         # approach with a pose the hover-distance above the requested pose
-        approach.position.z = approach.position.z + self._hover_distance
-        joint_angles = self.ik_request(approach)
+        approach_pose.position.z = approach_pose.position.z + self._hover_distance
+        joint_angles = self.ik_request(approach_pose)
         self.guarded_move_to_joint_position(joint_angles)
 
     def reach_out(self):
@@ -143,23 +146,29 @@ class BaxterAPI(object):
     def get_joint_angles(self):
         return self._limb.joint_angles()
 
-    def pick(self, pose, end_point_angle):
+    def pick(self, pose, image_tools, output_path, new_coors, coor, patch_size, grasp_angle):
         success = 0
         self.approach(pose)
-        joint_angles = self.get_joint_angles()
-        joint_angles['right_w2'] += end_point_angle
-        self.guarded_move_to_joint_position(joint_angles)
+        image_tools.save_image(output_path, new_coors, coor, patch_size, grasp_angle)
+        joint_angles_1 = self.get_joint_angles()
+        joint_angles_1['right_w2'] += grasp_angle
+        self.guarded_move_to_joint_position(joint_angles_1)
+
         self.reach_out()
+        rospy.sleep(1.0)
+        joint_angles_2 = self.get_joint_angles()
+
         self.gripper_close()
-        self.retract()
+        rospy.sleep(0.3)
+        self.guarded_move_to_joint_position(joint_angles_1)
         if self._gripper.position() > 6:
             success = 1
-            joint_angles = self.get_joint_angles()
-            joint_angles['right_w2'] = np.random.uniform(-pi, pi)
-            self.guarded_move_to_joint_position(joint_angles)
-            self.reach_out()
+            joint_angles_1['right_w2'] = np.random.uniform(-pi/2, pi/2)
+            joint_angles_2['right_w2'] = joint_angles_1['right_w2']
+            self.guarded_move_to_joint_position(joint_angles_1)
+            self.guarded_move_to_joint_position(joint_angles_2)
             self.gripper_open()
-            self.retract()
+            self.guarded_move_to_joint_position(joint_angles_1)
         return success
 
     def pick_and_place(self, pose, end_point_angle, initial_pose):

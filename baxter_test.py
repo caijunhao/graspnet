@@ -24,7 +24,7 @@ parser.add_argument('--num_patches', default=400, type=int)
 args = parser.parse_args()
 
 initial_orientation = Quaternion(x=0.0286820208316, y=0.999469262198, z=-0.00957069663929, w=0.0121217725021)
-initial_coordinate = Point(0.658153933314, -0.698397243796, 0.213631262747)
+initial_coordinate = Point(0.658153933314, -0.698397243796, 0.113631262747)
 initial_pose = Pose(position=initial_coordinate, orientation=initial_orientation)
 origin = (0.243271495648, 0.637174368871, 0.001)
 
@@ -37,8 +37,7 @@ def main():
 
     while not rospy.is_shutdown():
         utils.listener(args.topic_name, image_tools.callback)
-
-        image_tools.display_image()
+        # image_tools.display_image()
 
 
 if __name__ == '__main__':
