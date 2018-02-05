@@ -19,7 +19,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = '1'
 parser = argparse.ArgumentParser(description='grasping')
 parser.add_argument('--topic_name', default='/cameras/right_hand_camera/image', type=str)
 parser.add_argument('--limb', default='right', type=str)
-parser.add_argument('--hover_distance', default=0.1263, type=float, help='meters')
+parser.add_argument('--hover_distance', default=0.1563, type=float, help='meters')
 parser.add_argument('--reach_distance', default=0.010, type=float, help='meters')
 parser.add_argument('--img_id', default=0, type=int, help='image patch id to save')
 parser.add_argument('--patch_size', default=224, type=int, help='image patch size to crop')
@@ -84,8 +84,10 @@ def main():
         coors, images = image_tools.sampling_image(args.patch_size, args.num_patches)
         scores = sess.run(net, feed_dict={images_t: images})
         patch, coor, new_coors = image_tools.resampling_image(scores, coors, args.patch_size)
-        angle_index = sess.run(angle_index_t, feed_dict={images_t: patch})[0]
+        angle_index, scores= sess.run([angle_index_t, net], feed_dict={images_t: patch})
+        angle_index = angle_index[0]
         print angle_index
+        print scores
         grasp_angle = (angle_index * 10 - 90) * 1.0 / 180 * pi
         x -= float(coor[0] - 160) * 0.6 / 1000
         y -= float(coor[1] - 320) * 0.5 / 1000
@@ -98,28 +100,6 @@ def main():
                            coor,
                            args.patch_size,
                            grasp_angle)
-        # pnp.pick(Pose(position=Point(x, y, z), orientation=initial_orientation), grasp_angle)
-        # pick and save image
-        # success = 0
-        # pnp.approach(Pose(position=Point(x, y, z), orientation=initial_orientation))
-        # image_tools.save_wrist_image(args.output_path, new_coors, coor, args.patch_size, grasp_angle, scope='wrist')
-        # joint_angles_1 = pnp.get_joint_angles()
-        # joint_angles_1['right_w2'] += grasp_angle
-        # pnp.guarded_move_to_joint_position(joint_angles_1)
-        # pnp.reach_out()
-        # rospy.sleep(1.0)
-        # joint_angles_2 = pnp.get_joint_angles()
-        # pnp.gripper_close()
-        # rospy.sleep(0.3)
-        # pnp.guarded_move_to_joint_position(joint_angles_1)
-        # if pnp.gripper_position() > 6:
-        #     success = 1
-        #     joint_angles_1['right_w2'] = np.random.uniform(-pi/2, pi/2)
-        #     joint_angles_2['right_w2'] = joint_angles_1['right_w2']
-        #     pnp.guarded_move_to_joint_position(joint_angles_1)
-        #     pnp.guarded_move_to_joint_position(joint_angles_2)
-        #     pnp.gripper_open()
-        #     pnp.guarded_move_to_joint_position(joint_angles_1)
         pnp.move_to_start(initial_pose)
 
 
