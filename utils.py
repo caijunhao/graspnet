@@ -14,9 +14,13 @@ def listener(topic_name, image_tools):
 
 def get_center_coordinate_from_kinect(file_path):
     size = (1295, 685)
-    with open(file_path, 'r') as f:
-        coors = [int(coor) for coor in f.readline()[:-1].split(' ')]
-        idx = random.randint(0, len(coors) / 2 - 1)
+    coors = []
+    while not len(coors):
+        with open(file_path, 'r') as f:
+            string = f.readline()[:-1]
+        if string:
+            coors = [int(coor) for coor in string.split(' ')]
+            idx = random.randint(0, len(coors) / 2 - 1)
     return coors[idx * 2 + 1], size[0] - coors[idx * 2]
 
 
