@@ -72,13 +72,15 @@ def main():
         print 'Successfully loading model.'
 
     while not rospy.is_shutdown():
-        c_x, c_y = utils.get_center_coordinate_from_kinect(args.center_coor)
-        d_x = float(c_x) / 1000.0
-        d_y = float(c_y) / 1000.0
-        x = origin[0]+d_x
-        y = origin[1]+d_y
-        z = origin[2]
-        pnp.approach(Pose(position=Point(x, y, z), orientation=initial_orientation))
+        flag = 0
+        while flag != 1:
+            c_x, c_y = utils.get_center_coordinate_from_kinect(args.center_coor, args.limb)
+            d_x = float(c_x) / 1000.0
+            d_y = float(c_y) / 1000.0
+            x = origin[0] + d_x
+            y = origin[1] + d_y
+            z = origin[2]
+            flag = pnp.approach(Pose(position=Point(x, y, z), orientation=initial_orientation))
         rospy.sleep(0.7)
         utils.listener(args.topic_name, image_tools)
         coors, images = image_tools.sampling_image(args.patch_size, args.num_patches)

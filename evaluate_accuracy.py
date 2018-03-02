@@ -3,7 +3,7 @@ import os
 
 parser = argparse.ArgumentParser(description='evaluate grasping accuracy.')
 parser.add_argument('--file_path',
-                    default='/home/caijunhao/ros_ws/src/graspnet/semi_supervised_domain_adapt_753_result_3/grasping_label.txt',
+                    default='/home/caijunhao/ros_ws/src/graspnet/target_only_3088_result/grasping_label.txt',
                     type=str,
                     help='path to the file with grasping label.')
 args = parser.parse_args()
