@@ -187,7 +187,7 @@ def full_senet(inputs,
 
 
 def se_module(inputs, reduction_ratio=16, scope=''):
-    net = tf.reduce_mean(inputs, [1, 2], name=scope+'/global_pooling', keepdims=True)
+    net = tf.reduce_mean(inputs, [1, 2], name=scope+'/global_pooling', keep_dims=True)
     channel_size = net.get_shape().as_list()[-1]
     sqeeze = slim.conv2d(net, channel_size / reduction_ratio, [1, 1], scope=scope + '/squeeze')
     excitation = slim.conv2d(sqeeze, channel_size, [1, 1], activation_fn=None, scope=scope + '/excitation')

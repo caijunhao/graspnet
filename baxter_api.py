@@ -105,7 +105,11 @@ class BaxterAPI(object):
         # approach with a pose the hover-distance above the requested pose
         approach_pose.position.z = approach_pose.position.z + self._hover_distance
         joint_angles = self.ik_request(approach_pose)
-        self.guarded_move_to_joint_position(joint_angles)
+        if joint_angles:
+            self.guarded_move_to_joint_position(joint_angles)
+            return 1
+        else:
+            return 0
 
     def reach_out(self):
         # retrieve current pose from endpoint
@@ -147,11 +151,11 @@ class BaxterAPI(object):
         return self._limb.joint_angles()
 
     def pick(self, pose, image_tools, output_path, new_coors, coor, patch_size, grasp_angle):
-        success = 0
+        success = 1
         self.approach(pose)
         image_tools.save_image(output_path, new_coors, coor, patch_size, grasp_angle)
         joint_angles_1 = self.get_joint_angles()
-        joint_angles_1['right_w2'] += grasp_angle
+        joint_angles_1[self._limb_name+'_w2'] += grasp_angle
         self.guarded_move_to_joint_position(joint_angles_1)
 
         self.reach_out()
@@ -162,9 +166,9 @@ class BaxterAPI(object):
         rospy.sleep(0.3)
         self.guarded_move_to_joint_position(joint_angles_1)
         if self._gripper.position() > 6:
-            success = 1
-            joint_angles_1['right_w2'] = np.random.uniform(-pi/2, pi/2)
-            joint_angles_2['right_w2'] = joint_angles_1['right_w2']
+            success = 0
+            joint_angles_1[self._limb_name+'_w2'] = np.random.uniform(-pi/2, pi/2)
+            joint_angles_2[self._limb_name+'_w2'] = joint_angles_1[self._limb_name+'_w2']
             self.guarded_move_to_joint_position(joint_angles_1)
             self.guarded_move_to_joint_position(joint_angles_2)
             self.gripper_open()
@@ -175,7 +179,7 @@ class BaxterAPI(object):
         success = 0
         self.approach(pose)
         joint_angles = self.get_joint_angles()
-        joint_angles['right_w2'] += end_point_angle
+        joint_angles[self._limb_name+'_w2'] += end_point_angle
         self.guarded_move_to_joint_position(joint_angles)
         self.reach_out()
         self.gripper_close()

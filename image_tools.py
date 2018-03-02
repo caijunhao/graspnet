@@ -24,21 +24,20 @@ class ImageTools(object):
         else:
             print "successfully receive an image"
 
-    def sampling_image(self, patch_size=224, num_patches=400, sampling_factor=0.8):
+    def sampling_image(self, patch_size=224, num_patches=400, sampling_factor=0.5):
         height, width, _ = self.cv2_img.shape
         rgb_img = copy.deepcopy(self.cv2_img)[..., ::-1]
         exclude_height = int((height - patch_size) / 2 * sampling_factor)
         exclude_weight = int((width - patch_size) / 2 * sampling_factor)
         c_h = np.random.randint(patch_size/2+exclude_height, (height-patch_size/2)-exclude_height, num_patches)
         c_w = np.random.randint(patch_size/2+exclude_weight, (width-patch_size/2)-exclude_weight, num_patches)
-        threshold = 17.0
+        threshold = 16.0
         images = []
         coors = []
         for i in xrange(num_patches):
             img = rgb_img[c_h[i] - patch_size / 2: c_h[i] + patch_size / 2 + patch_size % 2,
                           c_w[i] - patch_size / 2: c_w[i] + patch_size / 2 + patch_size % 2, :]
             std = np.std(img)
-            print 'std: {}'.format(std)
             if std > threshold:
                 images.append(img)
                 coors.append((c_h[i], c_w[i]))

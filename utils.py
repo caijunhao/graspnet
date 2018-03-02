@@ -12,7 +12,7 @@ def listener(topic_name, image_tools):
     sub.unregister()
 
 
-def get_center_coordinate_from_kinect(file_path):
+def get_center_coordinate_from_kinect(file_path, hand='right'):
     size = (1295, 685)
     coors = []
     while not len(coors):
@@ -21,7 +21,10 @@ def get_center_coordinate_from_kinect(file_path):
         if string:
             coors = [int(coor) for coor in string.split(' ')]
             idx = random.randint(0, len(coors) / 2 - 1)
-    return coors[idx * 2 + 1], size[0] - coors[idx * 2]
+    if hand == 'right':
+        return coors[idx * 2 + 1], size[0] - coors[idx * 2]
+    else:
+        return coors[idx * 2 + 1], coors[idx * 2]
 
 
 def convert_to_baxter_coordinate(x, y, origin):
